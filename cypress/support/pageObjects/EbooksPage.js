@@ -1,6 +1,7 @@
-class EbooksPage{
-    getBookInfoPag(){
-        return cy.get('.books-grid > div > :has(a[href*="interes-superior"])')
+class EbooksPage {
+
+    getBookInfoPag() {
+        return cy.get('.q-card__section >>h3 a[href="/libros/interes-superior-menor-custodia-monoparental-1087"]')
     }
 }
 

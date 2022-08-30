@@ -2,12 +2,23 @@
 
 import HomePage from '../support/pageObjects/HomePage.js'
 import EbooksPage from '../support/pageObjects/EbooksPage.js'
+import MyEbookDetails from '../support/pageObjects/MyEbookDetails.js'
+import ShoppingCart from '../support/pageObjects/ShoppingCart.js'
+import ConfirmPurchasePage from '../support/pageObjects/ConfirmPurchasePage.js'
+import Login from '../support/pageObjects/Login.js'
+import MyProfilePage from '../support/pageObjects/MyProfilePage.js'
 
 describe('comprar un libro de 0 euros y verificar que se puede entrar y el libro esta disponible', function () {
   const homePage = new HomePage()
   const ebooksPage = new EbooksPage()
+  const myEbookDetails = new MyEbookDetails()
+  const shoppingCart = new ShoppingCart()
+  const confirmPurchasePage = new ConfirmPurchasePage()
+  const login = new Login()
+  const myProfilePage = new MyProfilePage()
 
-  it('openPage', function () {
+
+  before(() => {
     cy.visit('https://www.colex.es/')
   })
 
@@ -16,95 +27,50 @@ describe('comprar un libro de 0 euros y verificar que se puede entrar y el libro
   })
 
   it('open book info page', function () {
-    cy.get('.q-card__section >>h3 a[href="/libros/interes-superior-menor-custodia-monoparental-1087"]').click()
+    ebooksPage.getBookInfoPag().click()
   })
+
   it('addCart', function () {
-    cy.get('#buy_now').click({ force: true })
+    myEbookDetails.addCart().click({ force: true })
   })
+
   it('completeForm', function () {
-
-    cy.get('[aria-label="Nombre y Apellidos / Razón Social"]').type('Rafael Jose Jimenez')
-    cy.get('[aria-label="CIF/NIF"]').type('75156492j')
-    cy.get('[aria-label="Email"]').type('rafajimenez.gr@gmail.com')
-    cy.get('[aria-label="Número de Teléfono"]').type('633806374')
-    cy.get('[aria-label="Dirección"]').type('costa Rica')
-    cy.get('[aria-label="Código Postal"]').type('28007')
-    cy.get('[aria-label="Municipio"]').clear().type('A Coruña')
-    cy.get('[aria-label="Provincia"]').click({ force: true })
-    cy.get('.q-menu').as('provinciaList').invoke('attr', 'style', 'visibility:visible')
-    cy.get('.q-item__label>span').contains('La Coruña').click()
-    cy.get('[data-testid="process-cart-btn-secondary"]').click()
-    
-
-
-  })
-  it('confirmToBuy', function () {
-    cy.get('[data-testid="confirm-cart-btn"]').click()
-
+    shoppingCart.addName().type('Rafael Jose Jimenez')
+    shoppingCart.addNIF().type('75156492j')
+    shoppingCart.addMail().type('rafajimenez.gr@gmail.com')
+    shoppingCart.addTlf().type('633806374')
+    shoppingCart.AddAddress().type('costa Rica')
+    shoppingCart.AddPostal().type('28007')
+    shoppingCart.AddTown().clear().type('A Coruña')
+    shoppingCart.OpenProvinceMenu().click({ force: true })
+    shoppingCart.KeepOpenProvinceMenu().invoke('attr', 'style', 'visibility:visible')
+    shoppingCart.SelectProvince().contains('La Coruña').click()
+    shoppingCart.ConfirmData().click()
   })
 
-  it('alert', function () {
-    cy.get('.q-card.q-dialog-plugin.ask-proceed-order-dialog').invoke('attr', 'style', 'display:block')
-    cy.get('button[data-autofocus="true"]').click()
-    cy.get('.q-card.q-dialog-plugin.thanks-for-purchase-email').invoke('attr', 'style', 'display:block')
-    cy.get('.q-card__actions .q-btn').click()
+  it('confirmToBuy & alert', function () {
+    confirmPurchasePage.ConfirmToBuy().click()
+    confirmPurchasePage.firstAlert().invoke('attr', 'style', 'display:block')
+    confirmPurchasePage.firstAlertOk().click()
+    confirmPurchasePage.secondAlert().invoke('attr', 'style', 'display:block')
+    confirmPurchasePage.secondAlertOk().click()
 
   })
 
   it('toAccess', function () {
-    cy.get('[aria-label="Usuario"]').type('rafajimenez.gr@gmail.com')
-    cy.get('[aria-label="Contraseña"]').type('Rafa1985')
-    cy.get('[data-testid="login-submit-btn"] > .q-btn__content').click()
+    login.insertUser().type('rafajimenez.gr@gmail.com')
+    login.insertPassword().type('Rafa1985')
+    login.toAccess().click()
 
   })
 
-  it('accessToMisLIbros', function () {
-    cy.get('[data-testid="profile-btn"] > .q-btn__content').click()
-  })
-
-  it('MiPerfil', function () {
-    cy.get('.q-splitter__before > [data-testid="profile-options-list"]').invoke('attr', 'style', 'display:block')
-    cy.get('.q-splitter__panel .q-list > a[href="/perfil/mis-libros"]').click()
-
-  })
-
-  it('reopenEbooksMenu', function () {
-    homePage.getEbooksPage().click({ force: true })
-  })
-
-  it('reopenBookInfoPage', function () {
-    cy.get('.q-card__section >>h3 a[href="/libros/interes-superior-menor-custodia-monoparental-1087"]').click()
-  })
-  it('addCartAgain', function () {
-    cy.get('#buy_now').click({ force: true })
-
-  })
-
-  it('BuyDefinitly', function(){
-    cy.get('[data-testid="process-cart-btn-secondary"]').click()
-
-  })
-  it('reconfirmToBuy', function () {
-    cy.get('[data-testid="confirm-cart-btn"]').click()
-    cy.get('.q-card.q-dialog-plugin.process-order-dialog').invoke('attr', 'style', 'display:block')
-    cy.get('.q-card__actions > :nth-child(1) > .q-btn__content').click()
-    cy.get('.q-card.q-dialog-plugin.ask-proceed-order-dialog ').invoke('attr', 'style', 'display:block')
-    cy.get('.bg-positive > .q-btn__content').click()
-    cy.get('div[class*="order-succeded"]').invoke('attr', 'style', 'visibility:visible')
-    cy.get('[data-autofocus="true"]').click()
-  })
-  it('accessToMisLIbros', function () {
-    cy.get('[data-testid="profile-btn"] > .q-btn__content').click()
+  it('accessMiPerfl', function () {
+    homePage.getMyProfile().click()
   })
 
   it('MiPerfil', function () {
-    cy.get('.q-splitter__before > [data-testid="profile-options-list"]').invoke('attr', 'style', 'display:block')
-    cy.get('.q-splitter__panel .q-list > a[href="/perfil/mis-libros"]').click()
-
-  })
-
-  it('mislibros', function(){
-    cy.visit('https://www.colex.es/perfil/mis-libros')
+    myProfilePage.keepMenuOpen.invoke('attr', 'style', 'display:block')
+    myProfilePage.openMiBooks.click()
   })
 })
 
